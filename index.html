@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>色谱柱产品查询系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #2c3e50 0%, #4a6491 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .header h1 i {
+            font-size: 32px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .main-content {
+            padding: 30px;
+        }
+        
+        .product-type-selector {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .product-type-selector label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-right: 15px;
+            color: #2c3e50;
+        }
+        
+        .type-select {
+            padding: 12px 25px;
+            font-size: 16px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            background: white;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 200px;
+        }
+        
+        .type-select:hover {
+            background: #f8f9fa;
+        }
+        
+        .type-select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+        }
+        
+        .filter-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .filter-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .filter-select:hover {
+            border-color: #3498db;
+        }
+        
+        .filter-select:disabled {
+            background: #e9ecef;
+            cursor: not-allowed;
+        }
+        
+        .results-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .results-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .results-container {
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .product-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .product-price {
+            color: #e74c3c;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        
+        .product-details {
+            margin-bottom: 15px;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #495057;
+            min-width: 50px;
+        }
+        
+        .detail-value {
+            color: #2c3e50;
+        }
+        
+        .product-description {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            font-style: italic;
+            color: #6c757d;
+            border-left: 4px solid #3498db;
+            margin-top: 10px;
+        }
+        
+        .product-code {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #3498db;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 14px;
+            border-top: 1px solid #e9ecef;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+            
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-vial"></i> 色谱柱产品智能查询系统</h1>
+            <p>选择产品类型，设置筛选条件，快速查找产品信息</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="product-type-selector">
+                <label for="productType"><i class="fas fa-filter"></i> 选择产品类型：</label>
+                <select id="productType" class="type-select">
+                    <option value="">请选择产品类型</option>
+                    <option value="液相">液相色谱柱</option>
+                    <option value="气相">气相毛细柱</option>
+                    <option value="SPE">SPE 固相萃取柱</option>
+                </select>
+            </div>
+            
+            <div class="filter-section">
+                <div class="filter-title">
+                    <i class="fas fa-sliders-h"></i> 产品参数筛选
+                </div>
+                <div class="filter-grid" id="filterGrid">
+                    <!-- 筛选器动态生成 -->
+                    <div class="no-filters">
+                        请先选择产品类型
+                    </div>
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <i class="fas fa-spinner fa-spin"></i> 正在查询产品信息...
+            </div>
+            
+            <div class="results-section">
+                <div class="results-title">
+                    <i class="fas fa-search"></i> 查询结果
+                </div>
+                <div class="results-container" id="resultsContainer">
+                    <div class="no-results">
+                        <i class="fas fa-info-circle" style="font-size: 48px; margin-bottom: 15px;"></i>
+                        <p>请选择产品类型并设置筛选条件以查看结果</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2023 色谱柱产品查询系统 | 版本 1.0 | 数据实时更新</p>
+            <p>技术支持：基于Excel数据驱动的H5应用</p>
+        </div>
+    </div>
+
+    <script>
+        // 产品数据（直接从Excel表格中提取）
+        const productData = {
+            "液相": [
+                {
+                    "产品类型": "液相分析柱",
+                    "固定相类型": "C18",
+                    "型号": "C18",
+                    "粒径μm": "5",
+                    "内径mm": "4.6",
+                    "长度mm": "300",
+                    "市场价": "4300",
+                    "货号": "EC18-5-46300",
+                    "描述": "Excsep® C18,5μm,4.6×300mm"
+                },
+                {
+                    "产品类型": "液相分析柱",
+                    "固定相类型": "C18",
+                    "型号": "300 C18",
+                    "粒径μm": "5",
+                    "内径mm": "4.6",
+                    "长度mm": "300",
+                    "市场价": "5090",
+                    "货号": "EC18-5300-46300",
+                    "描述": "Excsep® 300 C18,5μm,4.6×300mm"
+                },
+                {
+                    "产品类型": "液相分析柱",
+                    "固定相类型": "C18",
+                    "型号": "AQ-C18",
+                    "粒径μm": "5",
+                    "内径mm": "4.6",
+                    "长度mm": "300",
+                    "市场价": "4300",
+                    "货号": "EAQ18-5-46300",
+                    "描述": "Excsep® AQ-C18,5μm,4.6×300mm"
+                },
+                {
+                    "产品类型": "液相分析柱",
+                    "固定相类型": "正相/HILIC",
+                    "型号": "NH2",
+                    "粒径μm": "5",
+                    "内径mm": "4.6",
+                    "长度mm": "300",
+                    "市场价": "4890",
+                    "货号": "ENH-5-46300",
+                    "描述": "Excsep® NH2,5μm,4.6×300mm"
+                }
+            ],
+            
+            "气相": [
+                {
+                    "产品类型": "气相毛细柱",
+                    "型号": "-1",
+                    "长度m": "10",
+                    "内径mm": "0.18",
+                    "膜厚μm": "0.18",
+                    "市场价": "4544",
+                    "货号": "EG1011-1018",
+                    "描述": "EP-1,10m×0.18mm×0.18μm"
+                },
+                {
+                    "产品类型": "气相毛细柱",
+                    "型号": "-5HT",
+                    "长度m": "10",
+                    "内径mm": "0.32",
+                    "膜厚μm": "0.1",
+                    "市场价": "6918",
+                    "货号": "EG1083-1010",
+                    "描述": "EP-5HT,10m×0.32mm×0.10μm"
+                },
+                {
+                    "产品类型": "气相毛细柱",
+                    "型号": "-1MS",
+                    "长度m": "10",
+                    "内径mm": "0.18",
+                    "膜厚μm": "0.18",
+                    "市场价": "4761",
+                    "货号": "EG1021-1018",
+                    "描述": "EP-1MS,10m×0.18mm×0.18μm"
+                },
+                {
+                    "产品类型": "气相毛细柱",
+                    "型号": "-1MS",
+                    "长度m": "10",
+                    "内径mm": "0.18",
+                    "膜厚μm": "0.18",
+                    "市场价": "4761",
+                    "货号": "EM1021-1018",
+                    "描述": "EM-1MS,10m×0.18mm×0.18μm"
+                },
+                {
+                    "产品类型": "气相毛细柱",
+                    "型号": "-select wine",
+                    "长度m": "30",
+                    "内径mm": "0.25",
+                    "膜厚μm": "0.24",
+                    "市场价": "9129",
+                    "货号": "EG1292-5024",
+                    "描述": "EP-select wine,30m×0.25mm×0.24μm"
+                }
+            ],
+            
+            "SPE": [
+                {
+                    "产品类型": "SPE",
+                    "固定相类型": "反相",
+                    "型号": "HLB",
+                    "克重mg": "10",
+                    "体积mL": "1",
+                    "数量": "100",
+                    "市场价": "1005.95",
+                    "货号": "SPEHLB-10-1",
+                    "描述": "Ontwsep® HLB,10mg/1mL,100pk"
+                },
+                {
+                    "产品类型": "SPE",
+                    "固定相类型": "离子交换",
+                    "型号": "MAX",
+                    "克重mg": "200",
+                    "体积mL": "6",
+                    "数量": "30",
+                    "市场价": "950",
+                    "货号": "SPEMAX-200-6",
+                    "描述": "Ontwsep® MAX,200mg/6mL,30pk"
+                },
+                {
+                    "产品类型": "SPE",
+                    "固定相类型": "专用柱",
+                    "型号": "PSA",
+                    "克重mg": "100",
+                    "体积mL": "1",
+                    "数量": "100",
+                    "市场价": "880",
+                    "货号": "SPEPSA-100-1",
+                    "描述": "Ontwsep® PSA,100mg/1mL,100pk"
+                }
+            ]
+        };
+
+        // 筛选器配置
+        const filterConfigs = {
+            "液相": [
+                { id: "fixedPhase", label: "固定相类型", field: "固定相类型" },
+                { id: "model", label: "型号", field: "型号" },
+                { id: "particleSize", label: "粒径(μm)", field: "粒径μm" },
+                { id: "innerDiameter", label: "内径(mm)", field: "内径mm" },
+                { id: "length", label: "长度(mm)", field: "长度mm" }
+            ],
+            "气相": [
+                { id: "model", label: "型号", field: "型号" },
+                { id: "length", label: "长度(m)", field: "长度m" },
+                { id: "innerDiameter", label: "内径(mm)", field: "内径mm" },
+                { id: "filmThickness", label: "膜厚(μm)", field: "膜厚μm" }
+            ],
+            "SPE": [
+                { id: "fixedPhase", label: "固定相类型", field: "固定相类型" },
+                { id: "model", label: "型号", field: "型号" },
+                { id: "weight", label: "克重(mg)", field: "克重mg" },
+                { id: "volume", label: "体积(mL)", field: "体积mL" },
+                { id: "quantity", label: "数量", field: "数量" }
+            ]
+        };
+
+        // DOM元素
+        const productTypeSelect = document.getElementById('productType');
+        const filterGrid = document.getElementById('filterGrid');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const loading = document.getElementById('loading');
+
+        // 当前选择的参数
+        let currentFilters = {};
+        let currentProductType = '';
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            productTypeSelect.addEventListener('change', handleProductTypeChange);
+            initializeFilters();
+        });
+
+        function initializeFilters() {
+            filterGrid.innerHTML = '<div class="no-filters">请先选择产品类型</div>';
+            currentFilters = {};
+            updateResults();
+        }
+
+        function handleProductTypeChange() {
+            const productType = productTypeSelect.value;
+            if (!productType) {
+                initializeFilters();
+                return;
+            }
+            
+            currentProductType = productType;
+            currentFilters = {};
+            createFilters(productType);
+            updateResults();
+        }
+
+        function createFilters(productType) {
+            filterGrid.innerHTML = '';
+            const config = filterConfigs[productType];
+            
+            config.forEach(filter => {
+                const filterGroup = document.createElement('div');
+                filterGroup.className = 'filter-group';
+                
+                const label = document.createElement('label');
+                label.textContent = filter.label;
+                label.htmlFor = filter.id;
+                
+                const select = document.createElement('select');
+                select.id = filter.id;
+                select.className = 'filter-select';
+                select.innerHTML = '<option value="">请选择</option>';
+                
+                // 获取该字段的所有可能值
+                const values = [...new Set(productData[productType].map(item => item[filter.field]))];
+                values.sort();
+                
+                values.forEach(value => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    select.appendChild(option);
+                });
+                
+                select.addEventListener('change', function() {
+                    currentFilters[filter.field] = this.value;
+                    updateFilterOptions(productType);
+                    updateResults();
+                });
+                
+                filterGroup.appendChild(label);
+                filterGroup.appendChild(select);
+                filterGrid.appendChild(filterGroup);
+            });
+        }
+
+        function updateFilterOptions(productType) {
+            const config = filterConfigs[productType];
+            const data = productData[productType];
+            
+            // 根据已选择的筛选器过滤数据
+            let filteredData = data.filter(item => {
+                for (const [field, value] of Object.entries(currentFilters)) {
+                    if (value && item[field] !== value) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+            
+            // 更新每个筛选器的选项
+            config.forEach(filter => {
+                const select = document.getElementById(filter.id);
+                const currentValue = select.value;
+                
+                // 获取该字段在筛选后数据中的所有可能值
+                const availableValues = [...new Set(filteredData.map(item => item[filter.field]))];
+                availableValues.sort();
+                
+                // 更新选项
+                select.innerHTML = '<option value="">请选择</option>';
+                availableValues.forEach(value => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    if (value === currentValue) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function updateResults() {
+            const productType = productTypeSelect.value;
+            if (!productType) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-info-circle" style="font-size: 48px; margin-bottom: 15px;"></i>
+                        <p>请选择产品类型并设置筛选条件以查看结果</p>
+                    </div>`;
+                return;
+            }
+            
+            const data = productData[productType];
+            
+            // 应用筛选
+            let filteredData = data.filter(item => {
+                for (const [field, value] of Object.entries(currentFilters)) {
+                    if (value && item[field] !== value) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+            
+            // 显示加载效果
+            loading.style.display = 'block';
+            resultsContainer.innerHTML = '';
+            
+            // 模拟网络延迟
+            setTimeout(() => {
+                loading.style.display = 'none';
+                
+                if (filteredData.length === 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-search" style="font-size: 48px; margin-bottom: 15px;"></i>
+                            <p>没有找到匹配的产品</p>
+                            <p style="margin-top: 10px; font-size: 14px; color: #999;">请尝试调整筛选条件</p>
+                        </div>`;
+                    return;
+                }
+                
+                // 显示结果
+                const resultsGrid = document.createElement('div');
+                resultsGrid.className = 'results-grid';
+                
+                filteredData.forEach(product => {
+                    const card = createProductCard(product);
+                    resultsGrid.appendChild(card);
+                });
+                
+                resultsContainer.innerHTML = '';
+                resultsContainer.appendChild(resultsGrid);
+            }, 500);
+        }
+
+        function createProductCard(product) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            
+            card.innerHTML = `
+                <div class="product-header">
+                    <span class="product-price">¥${product['市场价']}</span>
+                </div>
+                <div class="product-details">
+                    <div class="detail-row">
+                        <span class="detail-label">货号：</span>
+                        <span class="product-code">${product['货号']}</span>
+                    </div>
+                </div>
+                <div class="product-description">
+                    ${product['描述']}
+                </div>`;
+            
+            return card;
+        }
+    </script>
+</body>
+</html>
